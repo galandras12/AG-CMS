@@ -263,3 +263,27 @@ Első fázis: projekt alapváz.
   Szerkesztő szerepkörnél a lista csak olvasható (nincs feltöltés/
   kiválasztás/törlés gomb). Az API oldalon a `POST /api/media` mostantól
   egy lépésben elfogadja az elnevezést (`altText`) is a fájllal együtt.
+- **Új plugin: `cookie-consent`** - EU/GDPR-kötelező sütikezelési
+  értesítő sáv a publikus oldalon, amit a látogatónak el kell fogadnia
+  (az elfogadás a böngészőjében, `localStorage`-ban marad meg). A
+  megjelenítés és a szöveg (üzenet, elfogadás gomb, "Részletek" link)
+  a Személyre szabás felület új "Sütikezelési (GDPR) értesítés" kártyáján
+  élőben be/kikapcsolható és szerkeszthető (admin-only), mentés után
+  azonnal újragenerálja a publikus oldalt. A `plugin.json` `enabled`
+  mezője külön, szerver-szintű kapcsoló (csak restart után hat) - ez a
+  funkció létezését szabályozza, míg a Személyre szabás kapcsolója a
+  napi be/kikapcsolást.
+- Ehhez új, általános célú hook: **`render:beforeWrite`** - minden
+  legenerált oldal (főoldal + minden bejegyzés) HTML-jének lemezre
+  írása előtt lefut, a handler egy módosított `html`-t adhat vissza -
+  ide illik bármilyen "minden oldalra beszúrandó" tartalom (cookie
+  banner, analitika-kód, stb.), nem csak a cookie-consent pluginhoz.
+- Új tesztek (`cookieConsentPlugin.test.js`): a banner alapból nincs
+  ott, bekapcsolás után minden legenerált oldalon megjelenik a saját
+  szöveggel (helyesen escapelve - egy `<script>`-et tartalmazó teszt
+  üzenet nem futhat le), kikapcsolás után újra eltűnik. Valós
+  böngészős (Playwright/Chromium) teszt: élő be/kikapcsolás az
+  adminból, elfogadás után a sáv eltűnik és újratöltés után is rejtve
+  marad, új (tiszta) böngésző-kontextusban viszont újra megjelenik -
+  és mindez Node nélkül, sima statikus szerverről kiszolgálva is
+  hibátlanul működik. Összesen 34 teszt, mind zöld.

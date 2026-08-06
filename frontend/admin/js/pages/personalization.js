@@ -69,6 +69,32 @@ window.AGCMS_PAGES.personalization = async function renderPersonalization(contai
     </section>
 
     <section class="agcms-card agcms-card--wide">
+      <h2>${escapeHtml(t('personalization.cookieConsentTitle'))}</h2>
+      <p class="agcms-muted">${escapeHtml(t('personalization.cookieConsentHint'))}</p>
+      <form id="cookie-consent-form" class="agcms-form">
+        <label class="agcms-checkbox">
+          <input type="checkbox" name="cookieConsentEnabled" ${settings.cookieConsent.enabled ? 'checked' : ''} ${disabledAttr} />
+          ${escapeHtml(t('personalization.cookieConsentEnabled'))}
+        </label>
+        <label>${escapeHtml(t('personalization.fieldCookieMessage'))}
+          <textarea name="cookieConsentMessage" rows="3" ${disabledAttr}>${escapeHtml(settings.cookieConsent.message)}</textarea>
+        </label>
+        <div class="agcms-form-row">
+          <label>${escapeHtml(t('personalization.fieldCookieAcceptLabel'))}
+            <input type="text" name="cookieConsentAcceptLabel" value="${escapeHtml(settings.cookieConsent.acceptLabel)}" ${disabledAttr} />
+          </label>
+          <label>${escapeHtml(t('personalization.fieldCookieLearnMoreLabel'))}
+            <input type="text" name="cookieConsentLearnMoreLabel" value="${escapeHtml(settings.cookieConsent.learnMoreLabel)}" ${disabledAttr} />
+          </label>
+          <label>${escapeHtml(t('personalization.fieldCookieLearnMoreUrl'))}
+            <input type="text" name="cookieConsentLearnMoreUrl" placeholder="https://example.com/adatvedelem" value="${escapeHtml(settings.cookieConsent.learnMoreUrl)}" ${disabledAttr} />
+          </label>
+        </div>
+        ${isAdmin ? `<div class="agcms-form-actions"><button type="submit" class="agcms-btn">${escapeHtml(t('common.save'))}</button></div>` : ''}
+      </form>
+    </section>
+
+    <section class="agcms-card agcms-card--wide">
       <h2>${escapeHtml(t('personalization.widgetsTitle'))}</h2>
       <form id="widget-add-form" class="agcms-form agcms-form--inline">
         <select name="type">
@@ -246,6 +272,24 @@ window.AGCMS_PAGES.personalization = async function renderPersonalization(contai
             sitemapEnabled: form.sitemapEnabled.checked,
             robotsEnabled: form.robotsEnabled.checked,
             robotsTxt: form.robotsTxt.value,
+          },
+        }),
+      });
+      toast(t('personalization.savedSuccess'));
+    });
+
+    document.getElementById('cookie-consent-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const form = event.target;
+      await apiFetch('/api/settings', {
+        method: 'PATCH',
+        body: JSON.stringify({
+          cookieConsent: {
+            enabled: form.cookieConsentEnabled.checked,
+            message: form.cookieConsentMessage.value,
+            acceptLabel: form.cookieConsentAcceptLabel.value,
+            learnMoreLabel: form.cookieConsentLearnMoreLabel.value,
+            learnMoreUrl: form.cookieConsentLearnMoreUrl.value.trim(),
           },
         }),
       });

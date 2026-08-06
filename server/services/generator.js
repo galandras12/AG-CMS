@@ -108,9 +108,14 @@ async function generateSite() {
     sidebarWidgetsHtml,
     footerWidgetsHtml,
   });
-  fs.writeFileSync(path.join(config.publicDir, 'index.html'), indexHtml);
+  // A render:beforeWrite hookon keresztul pluginok (pl. cookie-consent)
+  // tartalmat szurhatnak be minden legeneralt oldalba (tipikusan a
+  // </body> ele), meg mielott a fajl lemezre iródik.
+  const indexResult = await hooks.trigger('render:beforeWrite', { html: indexHtml, pageType: 'index', site });
+  fs.writeFileSync(path.join(config.publicDir, 'index.html'), indexResult.html);
 
-  publishedPosts.forEach((post, i) => {
+  for (let i = 0; i < publishedPosts.length; i += 1) {
+    const post = publishedPosts[i];
     const contentHtml = marked.parse(post.contentMarkdown || '');
     const html = templateEngine.render(postTemplate, {
       site,
@@ -123,8 +128,9 @@ async function generateSite() {
       sidebarWidgetsHtml,
       footerWidgetsHtml,
     });
-    fs.writeFileSync(path.join(config.publicDir, `${post.slug}.html`), html);
-  });
+    const postResult = await hooks.trigger('render:beforeWrite', { html, pageType: 'post', site, post });
+    fs.writeFileSync(path.join(config.publicDir, `${post.slug}.html`), postResult.html);
+  }
 
   if (settings.seo.robotsEnabled) {
     fs.writeFileSync(path.join(config.publicDir, 'robots.txt'), settings.seo.robotsTxt || '');
