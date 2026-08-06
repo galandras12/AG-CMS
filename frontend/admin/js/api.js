@@ -28,10 +28,12 @@
 
   async function apiFetch(path, options = {}) {
     const backendUrl = await getBackendUrl();
+    const isFormData = options.body instanceof FormData;
+    const headers = isFormData ? { ...options.headers } : { 'Content-Type': 'application/json', ...options.headers };
     return fetch(`${backendUrl}${path}`, {
       credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
       ...options,
+      headers,
     });
   }
 

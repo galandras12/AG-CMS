@@ -3,6 +3,7 @@ const createApp = require('./app');
 const hooks = require('./core/hooks');
 const { loadPlugins } = require('./core/pluginLoader');
 const { bootstrapAdmin } = require('./core/bootstrapAdmin');
+const adminMenu = require('./core/adminMenu');
 const logger = require('./core/logger');
 
 async function start() {
@@ -10,6 +11,10 @@ async function start() {
 
   const loadedPlugins = loadPlugins({ logger, config });
   logger.info(`Betoltott pluginok (${loadedPlugins.length}): ${loadedPlugins.join(', ') || '-'}`);
+
+  // A pluginok az 'admin:menu:register' hook-on keresztul sajat menupontokat
+  // adhatnak az admin oldalsavhoz (lasd plugins/README.md).
+  await hooks.trigger('admin:menu:register', { registerItem: adminMenu.registerMenuItem });
 
   const app = createApp();
 

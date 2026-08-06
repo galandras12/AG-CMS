@@ -1,6 +1,7 @@
 (async function () {
   const { t, initI18n, setLang, currentLang } = window.AGCMS_I18N;
   const { checkServerReachable, apiFetch } = window.AGCMS_API;
+  const { escapeHtml } = window.AGCMS_UI;
   const root = document.getElementById('app');
 
   await initI18n();
@@ -16,7 +17,7 @@
 
   const user = await tryFetchMe();
   if (user) {
-    renderAuthenticated(user);
+    await renderShell(user);
   } else {
     renderLogin();
   }
@@ -35,8 +36,8 @@
   function renderNoConnection() {
     root.innerHTML = `
       <div class="agcms-card agcms-card--center">
-        <h1>${t('common.appName')}</h1>
-        <p class="agcms-error">${t('auth.noConnection')}</p>
+        <h1>${escapeHtml(t('common.appName'))}</h1>
+        <p class="agcms-error">${escapeHtml(t('auth.noConnection'))}</p>
       </div>
     `;
   }
@@ -44,15 +45,15 @@
   function renderLogin() {
     root.innerHTML = `
       <div class="agcms-card agcms-card--center">
-        <h1>${t('auth.loginTitle')}</h1>
+        <h1>${escapeHtml(t('auth.loginTitle'))}</h1>
         <form id="login-form">
-          <label>${t('auth.username')}
+          <label>${escapeHtml(t('auth.username'))}
             <input type="text" name="username" autocomplete="username" required />
           </label>
-          <label>${t('auth.password')}
+          <label>${escapeHtml(t('auth.password'))}
             <input type="password" name="password" autocomplete="current-password" required />
           </label>
-          <button type="submit">${t('auth.loginButton')}</button>
+          <button type="submit">${escapeHtml(t('auth.loginButton'))}</button>
           <p id="login-error" class="agcms-error" hidden></p>
         </form>
       </div>
@@ -85,7 +86,7 @@
       }
 
       const data = await res.json();
-      renderAuthenticated(data.user);
+      await renderShell(data.user);
     } catch (err) {
       showLoginError(t('auth.noConnection'));
     }
@@ -96,25 +97,78 @@
     }
   }
 
-  function renderAuthenticated(user) {
+  async function renderShell(user) {
+    const menuRes = await apiFetch('/api/admin/menu');
+    const { menu } = await menuRes.json();
+
     root.innerHTML = `
-      <div class="agcms-card">
-        <h1>${t('dashboard.title')}</h1>
-        <p>${escapeHtml(user.displayName)} (@${escapeHtml(user.username)}) - ${t('roles.' + user.role)}</p>
-        <button id="logout-btn">${t('auth.logoutButton')}</button>
-        <p class="agcms-muted">A teljes irányítópult a 3. fázisban készül el.</p>
+      <div class="agcms-shell">
+        <aside class="agcms-sidebar">
+          <nav id="sidebar-nav" class="agcms-nav"></nav>
+          <div class="agcms-sidebar-footer">
+            <div class="agcms-user-chip">${escapeHtml(user.displayName)} <span class="agcms-tag">${escapeHtml(t('roles.' + user.role))}</span></div>
+            <button id="logout-btn" class="agcms-btn-ghost agcms-btn--block">${escapeHtml(t('nav.logout'))}</button>
+          </div>
+        </aside>
+        <div class="agcms-content-wrap">
+          <main id="page-content" class="agcms-main agcms-main--shell"></main>
+        </div>
       </div>
     `;
+
     document.getElementById('logout-btn').addEventListener('click', async () => {
       await apiFetch('/api/auth/logout', { method: 'POST' });
+      location.hash = '';
       renderLogin();
     });
+
+    renderNav(menu);
+
+    const pageContent = document.getElementById('page-content');
+    const ctx = {
+      t,
+      apiFetch,
+      user,
+      navigate: window.AGCMS_ROUTER.navigate,
+    };
+
+    const router = window.AGCMS_ROUTER;
+    router.route('/dashboard', (params) => runPage('dashboard', 'dashboard', params, ctx));
+    router.route('/posts', (params) => runPage('posts', 'posts', params, ctx));
+    router.route('/posts/:id', (params) => runPage('posts', 'posts', params, ctx));
+    router.route('/posts/:id/edit', (params) => runPage('posts', 'posts', params, ctx));
+    router.route('/media', (params) => runPage('media', 'media', params, ctx));
+    router.route('/personalization', (params) => runPage('personalization', 'personalization', params, ctx));
+    router.route('/users', (params) => runPage('users', 'users', params, ctx));
+    router.start();
+
+    async function runPage(navId, pageId, params, ctx2) {
+      highlightNav(navId);
+      const renderFn = window.AGCMS_PAGES[pageId];
+      if (!renderFn) {
+        pageContent.innerHTML = `<p class="agcms-error">${escapeHtml(t('common.error'))}</p>`;
+        return;
+      }
+      await renderFn(pageContent, params, ctx2);
+    }
+
+    function highlightNav(navId) {
+      document.querySelectorAll('#sidebar-nav .agcms-nav-link').forEach((el) => {
+        el.classList.toggle('agcms-nav-link--active', el.dataset.navId === navId);
+      });
+    }
   }
 
-  function escapeHtml(value) {
-    const div = document.createElement('div');
-    div.textContent = value ?? '';
-    return div.innerHTML;
+  function renderNav(menu) {
+    const nav = document.getElementById('sidebar-nav');
+    nav.innerHTML = menu
+      .map((item) => {
+        if (item.url) {
+          return `<a class="agcms-nav-link" href="${escapeHtml(item.url)}" target="_blank" rel="noopener"><span>${item.icon || ''}</span> ${escapeHtml(t(item.label))}</a>`;
+        }
+        return `<a class="agcms-nav-link" data-nav-id="${item.id}" href="#/${item.id}"><span>${item.icon || ''}</span> ${escapeHtml(t(item.label))}</a>`;
+      })
+      .join('');
   }
 
   function initThemeToggle() {
