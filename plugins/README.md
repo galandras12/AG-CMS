@@ -48,6 +48,7 @@ engedélyezett pluginra. A `context` tartalmazza: `logger`, `config`,
 | Hook név              | Mikor fut                                   | Fázis    | Státusz |
 |------------------------|----------------------------------------------|----------|---------|
 | `server:ready`         | A HTTP szerver elindult és figyel            | 1        | aktív |
+| `auth:afterLogin`      | Sikeres bejelentkezés után                   | 2        | aktív |
 | `post:beforeSave`      | Bejegyzés mentése előtt (módosíthatja)       | 3        | tervezett |
 | `post:afterSave`       | Bejegyzés mentése után                       | 3        | tervezett |
 | `post:beforeDelete`    | Bejegyzés törlése előtt                      | 3        | tervezett |

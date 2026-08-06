@@ -43,16 +43,19 @@ class EncryptedJSONStore {
 
   /**
    * Sorosított olvas-módosít-ír ciklus. A mutator visszaadhatja az uj
-   * allapotot, vagy modosithatja helyben a kapott objektumot.
+   * allapotot, vagy modosithatja helyben a kapott objektumot. Ha a mutator
+   * hibat dob (pl. validacios hiba), a hiba csak az adott update() hivast
+   * buktatja el - a sor a kovetkezo update() hivasokhoz tovabb mukodik.
    */
   update(mutator) {
-    this._writeChain = this._writeChain.then(async () => {
+    const run = this._writeChain.catch(() => {}).then(async () => {
       const current = this.read();
       const next = (await mutator(current)) ?? current;
       this.write(next);
       return next;
     });
-    return this._writeChain;
+    this._writeChain = run.catch(() => {});
+    return run;
   }
 }
 
