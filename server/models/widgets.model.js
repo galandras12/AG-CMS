@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const { getStore } = require('../core/store');
+const hooks = require('../core/hooks');
 
 const store = getStore('widgets', { items: [] });
 const VALID_TYPES = ['text', 'recentPosts', 'socialLinks'];
@@ -26,6 +27,7 @@ async function create({ type, title, config, region }) {
     data.items.push(item);
     return data;
   });
+  await hooks.trigger('widgets:afterChange', { action: 'create', widget: item });
   return item;
 }
 
@@ -42,6 +44,7 @@ async function update(id, patch) {
     updated = item;
     return data;
   });
+  await hooks.trigger('widgets:afterChange', { action: 'update', widget: updated });
   return updated;
 }
 
@@ -53,7 +56,9 @@ async function reorder(order) {
     });
     return data;
   });
-  return list();
+  const items = await list();
+  await hooks.trigger('widgets:afterChange', { action: 'reorder', widgets: items });
+  return items;
 }
 
 async function remove(id) {
@@ -65,6 +70,7 @@ async function remove(id) {
     }
     return data;
   });
+  await hooks.trigger('widgets:afterChange', { action: 'remove', id });
 }
 
 module.exports = { list, create, update, reorder, remove, VALID_TYPES, VALID_REGIONS };

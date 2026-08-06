@@ -17,9 +17,10 @@ backend éppen nem fut. Az admin felület és API viszont csak akkor
   ami a `config/connection.json`-ból olvassa ki a backend URL-jét induláskor,
   nincs hardcode-olt cím.
 - **Publikus oldal** (`public/`) - a build script által generált statikus
-  HTML, önmagában is kiszolgálható nginx/Apache alól.
-- **Témák** (`themes/`) - előre elkészített frontend sablonok, amikből a
-  generátor dolgozik, admin felületen válthatók.
+  HTML, önmagában is kiszolgálható nginx/Apache alól (igazoltan tesztelve
+  Node nélkül, sima `http.server`-ről is).
+- **Témák** (`themes/`) - 3 előre elkészített frontend sablon (HTML+CSS),
+  amikből a generátor dolgozik, admin felületen válthatók.
 - **Tartalom** (`content/`) - titkosított adatfájlok (`content/data/*.enc`)
   és feltöltött médiafájlok (`content/media/`).
 - **Nyelvek** (`langs/`) - admin UI fordítások, alapból `en` és `hu`,
@@ -36,14 +37,14 @@ AG-CMS/
 │   ├── core/            # crypto, encrypted store, hook/plugin rendszer, admin menu, jwt, logger
 │   ├── middleware/      # auth (JWT+cookie), rate limit, szerepkor-ellenorzes
 │   ├── models/          # users, posts, media, settings, widgets, dashboardLayout
-│   ├── routes/          # API vegpontok (health, auth, users, posts, media, settings, widgets, dashboard, admin menu)
-│   ├── services/        # statikus generator (4. fazis)
+│   ├── routes/          # API vegpontok (health, auth, users, posts, media, settings, widgets, dashboard, admin menu, build, themes)
+│   ├── services/        # generator.js, templateEngine.js, widgetRenderer.js
 │   ├── tests/           # node:test tesztek
 │   ├── app.js
 │   └── server.js
-├── frontend/admin/      # teljes admin SPA: login, dashboard, bejegyzesek, media, szemelyre szabas, felhasznalok
-├── public/              # generalt statikus oldal kimenete
-├── themes/              # frontend sablonok (4. fazis)
+├── frontend/admin/      # teljes admin SPA: login, dashboard, bejegyzesek, media, temak, szemelyre szabas, felhasznalok
+├── public/              # generalt statikus oldal kimenete (nincs verziokezelve)
+├── themes/              # 3 kesz tema: modern-trendy-black, modern-minimal-darkgray, solid-light
 ├── content/
 │   ├── data/            # titkositott .enc adatfajlok (nincs verziokezelve)
 │   └── media/           # feltoltott mediafajlok (nincs verziokezelve)
@@ -110,7 +111,7 @@ A projekt lépésről lépésre épül fel:
 3. ✅ **Admin CRUD** - bejegyzések (draft/ütemezett/publikált), média,
    felhasználók, Személyre szabás (site név/leírás/favicon/logó/banner,
    widgetek, sitemap/robots.txt), testreszabható (drag-and-drop) dashboard.
-4. ⏳ **Statikus generálás + témaváltás** - 3 beépített téma, build script,
+4. ✅ **Statikus generálás + témaváltás** - 3 beépített téma, build script,
    automatikus generálás mentéskor + "Build most" gomb.
 
 ## Changelog
@@ -213,3 +214,43 @@ Első fázis: projekt alapváz.
   oldalon, bejegyzés létrehozása, drag-and-drop sorrend mentése és
   betöltés utáni megmaradása, valamint a szerkesztői szerepkör
   korlátozásainak megjelenése a felületen.
+- **Statikus generátor** (`server/services/generator.js`): a publikált
+  bejegyzésekből, a kiválasztott témából és a widgetekből legenerálja a
+  teljes `public/` mappát - `index.html` (lista) és `<slug>.html` minden
+  publikált bejegyzéshez, a Markdown tartalom valódi HTML-re konvertálva
+  (`marked`). A `content/media/` fájlok és a téma `assets/` mappája
+  bemásolódnak `public/media/` és `public/assets/` alá, így a kimenet
+  önmagában (Node nélkül) is teljesen működik - **igazoltan tesztelve**:
+  a Node szerver leállítása után egy sima `python -m http.server`-ről is
+  hibátlanul betöltődött az oldal, a CSS, a képek és a `robots.txt`/
+  `sitemap.xml` is.
+- **Minimál, függőség nélküli sablon motor** (`server/services/templateEngine.js`):
+  `{{key}}`/`{{{rawKey}}}` interpoláció, `{{#each}}`/`{{#if}}` blokkok -
+  ezekből épülnek fel a téma HTML sablonjai.
+- **3 kész téma** a `themes/` mappában, mindegyik `theme.json`
+  metaadattal (szerző, verzió, frissítés dátuma, leírás, előnézeti kép)
+  és saját CSS-sel/elrendezéssel:
+  - **Modern Trendi (Fekete)** - lila-kék gradienses hero, kártyarács.
+  - **Modern Minimalista (Sötétszürke)** - letisztult lista-nézet, sok
+    hézag, finom elválasztók.
+  - **Szolid Letisztult (Fehér/Világosszürke)** - klasszikus, középre
+    zárt blog elrendezés.
+- **Témaváltás** az admin "Témák" felületén (`/api/themes`) - kártyás
+  galéria előnézeti képpel, szerzővel, verzióval, frissítés dátumával;
+  aktiválás admin-only, azonnal újragenerálja a publikus oldalt.
+- **Automatikus generálás mentéskor** (`server/core/autoBuild.js`): a
+  `post:afterSave`/`post:afterDelete`/`settings:afterUpdate`/
+  `widgets:afterChange` hookokra épül - minden bejegyzés-, beállítás- és
+  widget-változás után újragenerálja a statikus oldalt. Egy build hiba
+  csak logolásra kerül, nem buktatja el a mentés API hívást. A
+  `build:beforeGenerate`/`build:afterGenerate` hookok is aktívak.
+- Kézi **"Build most" gomb** az admin irányítópult Gyors műveletek
+  blokkjában (`POST /api/build`).
+- Új **Személyre szabás** mező: publikus weboldal URL-je (`siteUrl`) - a
+  `sitemap.xml` érvényes, abszolút linkjeihez szükséges.
+- Új automatizált tesztek (`generator.test.js`): csak a publikált
+  bejegyzések kerülnek ki, a Markdown helyesen HTML-re konvertálódik, a
+  `robots.txt`/`sitemap.xml` csak bekapcsolva íródik ki, egy "Index"
+  című bejegyzés sosem írja felül a listázó `index.html`-t (fenntartott
+  slug), a widgetek megjelennek a generált oldalakon, és a témaváltás
+  valóban más sablont és CSS-t eredményez. Összesen 31 teszt, mind zöld.

@@ -2,7 +2,7 @@ window.AGCMS_PAGES = window.AGCMS_PAGES || {};
 
 window.AGCMS_PAGES.dashboard = async function renderDashboard(container, params, ctx) {
   const { t, apiFetch } = ctx;
-  const { escapeHtml } = window.AGCMS_UI;
+  const { escapeHtml, toast } = window.AGCMS_UI;
 
   container.innerHTML = `<p>${t('common.loading')}</p>`;
 
@@ -54,6 +54,7 @@ window.AGCMS_PAGES.dashboard = async function renderDashboard(container, params,
           <a href="#/posts/new" class="agcms-btn agcms-btn--sm">${escapeHtml(t('dashboard.quickActionNewPost'))}</a>
           <a href="#/media" class="agcms-btn agcms-btn--sm">${escapeHtml(t('dashboard.quickActionUploadMedia'))}</a>
           <a href="#/personalization" class="agcms-btn agcms-btn--sm">${escapeHtml(t('dashboard.quickActionPersonalization'))}</a>
+          <button type="button" id="dashboard-build-now" class="agcms-btn-ghost agcms-btn--sm">${escapeHtml(t('common.buildNow'))}</button>
         </div>
       `;
     }
@@ -107,6 +108,24 @@ window.AGCMS_PAGES.dashboard = async function renderDashboard(container, params,
 
   const sortableContainer = document.getElementById('sortable-blocks');
   wireDragAndDrop(sortableContainer, saveOrder);
+
+  const buildBtn = document.getElementById('dashboard-build-now');
+  if (buildBtn) {
+    buildBtn.addEventListener('click', async () => {
+      buildBtn.disabled = true;
+      try {
+        const res = await apiFetch('/api/build', { method: 'POST' });
+        if (res.ok) {
+          const { build } = await res.json();
+          toast(`${t('common.buildNow')}: ${build.postCount} bejegyzés (${build.theme.name})`);
+        } else {
+          toast(t('common.error'), 'error');
+        }
+      } finally {
+        buildBtn.disabled = false;
+      }
+    });
+  }
 
   container.querySelectorAll('.agcms-hide-block').forEach((btn) => {
     btn.addEventListener('click', () => hideBlock(btn.dataset.blockId));

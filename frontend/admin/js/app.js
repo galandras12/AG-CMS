@@ -138,6 +138,7 @@
     router.route('/posts/:id', (params) => runPage('posts', 'posts', params, ctx));
     router.route('/posts/:id/edit', (params) => runPage('posts', 'posts', params, ctx));
     router.route('/media', (params) => runPage('media', 'media', params, ctx));
+    router.route('/themes', (params) => runPage('themes', 'themes', params, ctx));
     router.route('/personalization', (params) => runPage('personalization', 'personalization', params, ctx));
     router.route('/users', (params) => runPage('users', 'users', params, ctx));
     router.start();

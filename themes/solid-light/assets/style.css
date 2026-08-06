@@ -1,0 +1,153 @@
+:root {
+  --bg: #ffffff;
+  --bg-alt: #f4f5f6;
+  --text: #1f2328;
+  --text-muted: #5b6169;
+  --border: #e1e4e8;
+  --accent: #b45309;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+}
+
+a {
+  color: var(--accent);
+}
+
+.site-header {
+  text-align: center;
+  padding: 3rem 1.5rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.site-logo {
+  max-height: 44px;
+  margin-bottom: 0.75rem;
+}
+
+.site-title {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.site-title a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.site-description {
+  margin: 0.5rem 0 0;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.site-banner img {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  display: block;
+}
+
+.content {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+}
+
+.post-card {
+  padding: 1.75rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.post-card:first-child {
+  padding-top: 0;
+}
+
+.post-card h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.4rem;
+}
+
+.post-full h1 {
+  margin: 0 0 0.35rem;
+  font-size: 2.1rem;
+}
+
+.post-meta {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-family: -apple-system, sans-serif;
+  margin: 0 0 0.75rem;
+}
+
+.post-excerpt {
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.read-more,
+.back-link {
+  display: inline-block;
+  margin-top: 0.6rem;
+  font-family: -apple-system, sans-serif;
+  font-size: 0.85rem;
+}
+
+.post-body {
+  margin-top: 1.5rem;
+}
+
+.widgets-row {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.5rem;
+}
+
+.widget {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1rem;
+  font-family: -apple-system, sans-serif;
+}
+
+.widget-title {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.widget ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+}
+
+.site-footer {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 3rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-family: -apple-system, sans-serif;
+  font-size: 0.82rem;
+}

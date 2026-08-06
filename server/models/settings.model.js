@@ -1,12 +1,14 @@
 const { getStore } = require('../core/store');
+const hooks = require('../core/hooks');
 
 const DEFAULTS = {
   siteName: 'AG-CMS',
   siteDescription: '',
+  siteUrl: '',
   faviconUrl: '',
   logoUrl: '',
   bannerUrl: '',
-  activeTheme: 'modern-dark',
+  activeTheme: 'modern-minimal-darkgray',
   seo: {
     sitemapEnabled: false,
     robotsEnabled: false,
@@ -33,6 +35,8 @@ async function update(patch) {
     updated = next;
     return next;
   });
+
+  await hooks.trigger('settings:afterUpdate', updated);
   return updated;
 }
 

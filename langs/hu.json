@@ -43,6 +43,7 @@
     "dashboard": "Irányítópult",
     "posts": "Bejegyzések",
     "media": "Média",
+    "themes": "Témák",
     "personalization": "Személyre szabás",
     "users": "Felhasználók",
     "help": "Súgó",
@@ -98,6 +99,7 @@
     "siteInfoTitle": "Weboldal adatai",
     "fieldSiteName": "Weboldal neve",
     "fieldSiteDescription": "Weboldal leírása",
+    "fieldSiteUrl": "Publikus weboldal URL-je",
     "fieldFavicon": "Favicon",
     "fieldLogo": "Logó",
     "fieldBanner": "Banner",
@@ -106,6 +108,7 @@
     "sitemapEnabled": "sitemap.xml bekapcsolása",
     "robotsEnabled": "robots.txt bekapcsolása",
     "fieldRobotsTxt": "robots.txt tartalma",
+    "sitemapNeedsUrl": "Add meg fent a publikus weboldal URL-jét, hogy a sitemap érvényes, teljes linkeket tartalmazzon.",
     "widgetsTitle": "Widgetek",
     "addWidget": "Widget hozzáadása",
     "widgetTypeText": "Szöveg",
@@ -119,6 +122,13 @@
     "regionFooter": "Lábjegyzet",
     "savedSuccess": "Beállítások mentve.",
     "confirmDeleteWidget": "Eltávolítod ezt a widgetet?"
+  },
+  "themes": {
+    "title": "Témák",
+    "author": "Szerző",
+    "active": "Aktív",
+    "activate": "Kiválasztás",
+    "activated": "Téma aktiválva."
   },
   "users": {
     "title": "Felhasználók",

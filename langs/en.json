@@ -43,6 +43,7 @@
     "dashboard": "Dashboard",
     "posts": "Posts",
     "media": "Media",
+    "themes": "Themes",
     "personalization": "Personalization",
     "users": "Users",
     "help": "Help",
@@ -98,6 +99,7 @@
     "siteInfoTitle": "Site information",
     "fieldSiteName": "Site name",
     "fieldSiteDescription": "Site description",
+    "fieldSiteUrl": "Public site URL",
     "fieldFavicon": "Favicon",
     "fieldLogo": "Logo",
     "fieldBanner": "Banner",
@@ -106,6 +108,7 @@
     "sitemapEnabled": "Enable sitemap.xml",
     "robotsEnabled": "Enable robots.txt",
     "fieldRobotsTxt": "robots.txt content",
+    "sitemapNeedsUrl": "Set the public site URL above for the sitemap to contain valid absolute links.",
     "widgetsTitle": "Widgets",
     "addWidget": "Add widget",
     "widgetTypeText": "Text",
@@ -119,6 +122,13 @@
     "regionFooter": "Footer",
     "savedSuccess": "Settings saved.",
     "confirmDeleteWidget": "Remove this widget?"
+  },
+  "themes": {
+    "title": "Themes",
+    "author": "Author",
+    "active": "Active",
+    "activate": "Activate",
+    "activated": "Theme activated."
   },
   "users": {
     "title": "Users",

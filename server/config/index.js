@@ -4,12 +4,18 @@ const fs = require('fs');
 require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 
 const rootDir = path.join(__dirname, '../..');
-// AGCMS_DATA_DIR_OVERRIDE: csak tesztekben hasznalt, hogy a titkositott
-// tarolo egy ideiglenes mappaba irjon a valodi content/data helyett.
+// AGCMS_*_DIR_OVERRIDE: csak tesztekben hasznalt, hogy a titkositott tarolo,
+// a mediafajlok es a generalt statikus oldal ideiglenes mappakba iranyuljanak
+// a valodi content/data, content/media es public/ helyett.
 const dataDir = process.env.AGCMS_DATA_DIR_OVERRIDE
   ? path.resolve(process.env.AGCMS_DATA_DIR_OVERRIDE)
   : path.join(rootDir, 'content', 'data');
-const mediaDir = path.join(rootDir, 'content', 'media');
+const mediaDir = process.env.AGCMS_MEDIA_DIR_OVERRIDE
+  ? path.resolve(process.env.AGCMS_MEDIA_DIR_OVERRIDE)
+  : path.join(rootDir, 'content', 'media');
+const publicDir = process.env.AGCMS_PUBLIC_DIR_OVERRIDE
+  ? path.resolve(process.env.AGCMS_PUBLIC_DIR_OVERRIDE)
+  : path.join(rootDir, 'public');
 
 const REQUIRED_ENV = ['ENCRYPTION_KEY', 'JWT_SECRET', 'COOKIE_SECRET'];
 for (const key of REQUIRED_ENV) {
@@ -43,6 +49,7 @@ module.exports = {
   rootDir,
   dataDir,
   mediaDir,
+  publicDir,
   port: parseInt(process.env.PORT, 10) || 4000,
   nodeEnv: process.env.NODE_ENV || 'development',
   encryptionKey: process.env.ENCRYPTION_KEY,

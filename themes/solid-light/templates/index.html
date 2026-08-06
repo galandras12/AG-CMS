@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{{site.name}}</title>
+<meta name="description" content="{{site.description}}" />
+{{#if site.faviconPath}}<link rel="icon" href="{{site.faviconPath}}" />{{/if}}
+<link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+<header class="site-header">
+  {{#if site.logoPath}}<img class="site-logo" src="{{site.logoPath}}" alt="{{site.name}}" />{{/if}}
+  <h1 class="site-title"><a href="index.html">{{site.name}}</a></h1>
+  {{#if site.description}}<p class="site-description">{{site.description}}</p>{{/if}}
+</header>
+{{#if site.bannerPath}}<div class="site-banner"><img src="{{site.bannerPath}}" alt="" /></div>{{/if}}
+
+<main class="content">
+  {{#each posts}}
+  <article class="post-card">
+    <h2><a href="{{this.url}}">{{this.title}}</a></h2>
+    <p class="post-meta">{{this.date}} &middot; {{this.author}}</p>
+    <p class="post-excerpt">{{this.excerpt}}</p>
+    <a class="read-more" href="{{this.url}}">Tovább olvasom &rarr;</a>
+  </article>
+  {{/each}}
+</main>
+
+<div class="widgets-row">
+  {{{sidebarWidgetsHtml}}}
+  {{{footerWidgetsHtml}}}
+</div>
+
+<footer class="site-footer">
+  <p>&copy; {{site.year}} {{site.name}}</p>
+</footer>
+</body>
+</html>
