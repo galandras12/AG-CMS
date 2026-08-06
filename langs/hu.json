@@ -104,6 +104,8 @@
     "fieldLogo": "Logó",
     "fieldBanner": "Banner",
     "pickFromMedia": "Kiválasztás a médiatárból",
+    "select": "Kiválasztás",
+    "fieldAssetLabel": "Elnevezés (opcionális)",
     "seoTitle": "Sitemap és robots.txt",
     "sitemapEnabled": "sitemap.xml bekapcsolása",
     "robotsEnabled": "robots.txt bekapcsolása",

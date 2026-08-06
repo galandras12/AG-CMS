@@ -104,6 +104,8 @@
     "fieldLogo": "Logo",
     "fieldBanner": "Banner",
     "pickFromMedia": "Choose from media library",
+    "select": "Select",
+    "fieldAssetLabel": "Name (optional)",
     "seoTitle": "Sitemap & robots.txt",
     "sitemapEnabled": "Enable sitemap.xml",
     "robotsEnabled": "Enable robots.txt",

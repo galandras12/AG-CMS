@@ -59,6 +59,7 @@ router.post('/', (req, res, next) => {
       size: req.file.size,
       storedFilename: req.file.filename,
       uploadedBy: req.user.sub,
+      altText: req.body?.altText,
     });
     res.status(201).json({ media: item });
   } catch (err) {

@@ -254,3 +254,12 @@ Első fázis: projekt alapváz.
   című bejegyzés sosem írja felül a listázó `index.html`-t (fenntartott
   slug), a widgetek megjelennek a generált oldalakon, és a témaváltás
   valóban más sablont és CSS-t eredményez. Összesen 31 teszt, mind zöld.
+- **Favicon/Logó/Banner választó javítva**: a korábbi egyszerű
+  legördülő lista helyett egy kártyás választó - az utolsó 5 feltöltött
+  kép elnevezéssel (amit feltöltéskor lehet megadni), közvetlen
+  **Feltöltés** gombbal a választó alatt, és soronkénti **Törlés**
+  lehetőséggel. A kiválasztott/frissen feltöltött kép mentés előtt is
+  megmarad egy esetleges lista-frissítés (feltöltés/törlés) után is.
+  Szerkesztő szerepkörnél a lista csak olvasható (nincs feltöltés/
+  kiválasztás/törlés gomb). Az API oldalon a `POST /api/media` mostantól
+  egy lépésben elfogadja az elnevezést (`altText`) is a fájllal együtt.
