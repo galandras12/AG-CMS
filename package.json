@@ -2,11 +2,11 @@
   "name": "ag-cms",
   "version": "0.1.0",
   "description": "AG-CMS - egyedi fejlesztésű, fájl-alapú titkosított Node.js CMS, SQL adatbázis és PHP nélkül.",
-  "main": "backend/server.js",
+  "main": "server/server.js",
   "scripts": {
-    "start": "node backend/server.js",
-    "dev": "node --watch backend/server.js",
-    "test": "node --test backend/tests/*.test.js"
+    "start": "node server/server.js",
+    "dev": "node --watch server/server.js",
+    "test": "node --test server/tests/*.test.js"
   },
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {

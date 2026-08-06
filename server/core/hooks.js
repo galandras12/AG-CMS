@@ -1,5 +1,5 @@
 /**
- * Esemény-alapú hook/plugin rendszer. A backend/core modulok és a plugins/
+ * Esemény-alapú hook/plugin rendszer. A server/core modulok és a plugins/
  * mappában elhelyezett pluginok ugyanezt a regisztrátort használják, hogy
  * beavatkozhassanak a CMS életciklusába (mentés előtt/után, szerver indulás,
  * admin menü bővítés, stb.) anélkül, hogy a core kódot módosítani kellene.

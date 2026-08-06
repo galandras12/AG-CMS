@@ -11,7 +11,7 @@ backend éppen nem fut. Az admin felület és API viszont csak akkor
 
 ## Architektúra dióhéjban
 
-- **Node.js + Express** backend (`backend/`) - authentikáció, admin API,
+- **Node.js + Express** szerver (`server/`) - authentikáció, admin API,
   fájl-alapú titkosított tárolás, statikus generátor.
 - **Admin frontend** (`frontend/admin/`) - statikus HTML/CSS/vanilla JS,
   ami a `config/connection.json`-ból olvassa ki a backend URL-jét induláskor,
@@ -31,7 +31,7 @@ backend éppen nem fut. Az admin felület és API viszont csak akkor
 
 ```
 AG-CMS/
-├── backend/            # Express szerver, API, core logika
+├── server/             # Express szerver, API, core logika
 │   ├── config/         # env + connection.json + version.json betoltese
 │   ├── core/            # crypto, encrypted store, hook rendszer, plugin loader, logger
 │   ├── middleware/      # auth, rate limit, szerepkor-ellenorzes (2. fazis)
@@ -52,10 +52,32 @@ AG-CMS/
 ├── config/
 │   ├── connection.json  # a backend URL-je, ezt olvassa a frontend
 │   └── version.json     # verzio szam + nev
+├── start.bat            # gyors inditas Windows alatt (lasd lentebb)
 └── .env.example
 ```
 
 ## Telepítés és indítás
+
+### Windows - gyors indítás (`start.bat`)
+
+Kattints duplán a repó gyökerében lévő **`start.bat`** fájlra (vagy futtasd
+parancssorból: `start.bat`). Ez automatikusan:
+
+1. ellenőrzi, hogy a Node.js telepítve van-e,
+2. ha nincs `.env` fájl, létrehozza a `.env.example` alapján, és leállítva
+   megkér, hogy töltsd ki az `ENCRYPTION_KEY` értékét (a kulcsot maga
+   generálja neked, csak be kell másolni),
+3. ha az `ENCRYPTION_KEY` még üres a `.env`-ben, figyelmeztet és nem indul
+   el, amíg nincs kitöltve,
+4. ha hiányzik a `node_modules`, lefuttatja az `npm install`-t,
+5. elindítja a szervert (`npm start`).
+
+Konfiguráció módosításához (port, CORS, kulcsok) egyszerűen szerkeszd a
+`.env` fájlt, majd indítsd újra a `start.bat`-ot. A backend elérési útját
+(ha nem `localhost:4000`-en fut) a `config/connection.json`
+`backendUrl` mezőjében állítsd be - ezt olvassa majd be az admin frontend.
+
+### Manuális indítás (macOS/Linux/Windows)
 
 ```bash
 npm install
@@ -68,11 +90,11 @@ Illeszd be a generált kulcsot a `.env` fájl `ENCRYPTION_KEY` sorába, majd:
 ```bash
 npm start          # production-szeru inditas
 npm run dev        # automatikus ujrainditas fajlvaltozasra (node --watch)
-npm test           # backend/tests futtatasa (node:test)
+npm test           # server/tests futtatasa (node:test)
 ```
 
 Indítás után: `GET http://localhost:4000/api/health` egy státusz JSON-t ad
-vissza (verzió, futásidő, stb.) - ez igazolja, hogy a backend fut és a
+vissza (verzió, futásidő, stb.) - ez igazolja, hogy a szerver fut és a
 konfiguráció betöltődött.
 
 ## Fejlesztési fázisok
@@ -97,23 +119,27 @@ A projekt lépésről lépésre épül fel:
 
 Első fázis: projekt alapváz.
 
-- Express szerver alapváz (`backend/app.js`, `backend/server.js`) helmet,
+- Express szerver alapváz (`server/app.js`, `server/server.js`) helmet,
   cors és cookie-parser middleware-ekkel, `/api/health` végponttal.
 - Fájl-alapú, **AES-256-GCM** titkosítású JSON adattároló motor
-  (`backend/core/store.js`, `backend/core/crypto.js`) - minden kollekció
+  (`server/core/store.js`, `server/core/crypto.js`) - minden kollekció
   külön `.enc` fájlban, sorosított (nem ütköző) írásokkal, hiányzó fájl
   esetén automatikus alapérték-létrehozással.
-- Esemény-alapú **hook/plugin rendszer** (`backend/core/hooks.js`,
-  `backend/core/pluginLoader.js`) - a `plugins/` mappában elhelyezett
+- Esemény-alapú **hook/plugin rendszer** (`server/core/hooks.js`,
+  `server/core/pluginLoader.js`) - a `plugins/` mappában elhelyezett
   bővítmények beavatkozhatnak a CMS életciklusába. Tartalmaz egy működő
   minta pluginot (`plugins/sample-hello-logger`).
-- Konfiguráció-betöltő (`backend/config/index.js`) - `.env`,
+- Konfiguráció-betöltő (`server/config/index.js`) - `.env`,
   `config/connection.json` és `config/version.json` beolvasása, kötelező
   `ENCRYPTION_KEY` ellenőrzéssel induláskor.
 - Nyelvi fájl-scaffold (`langs/en.json`, `langs/hu.json`) bővíthető
   struktúrában, dokumentált bővítési folyamattal (`langs/README.md`).
-- Automatizált tesztek (`backend/tests/`) a titkosított tárolóra
+- Automatizált tesztek (`server/tests/`) a titkosított tárolóra
   (round-trip, plaintext-mentesség, konkurens írások) és a hook
   rendszerre.
 - Teljes tervezett projektstruktúra létrehozva (`frontend/admin/`,
   `public/`, `themes/`, `content/media/`) a következő fázisokhoz.
+- A szerver kódja külön `server/` mappába rendezve (korábban `backend/`),
+  és hozzá egy `start.bat` Windows indítószkript, ami ellenőrzi a Node.js
+  meglétét, előkészíti a `.env`-et, telepíti a függőségeket, és elindítja
+  a szervert.
