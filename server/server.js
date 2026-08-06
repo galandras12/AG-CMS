@@ -2,15 +2,25 @@ const config = require('./config');
 const createApp = require('./app');
 const hooks = require('./core/hooks');
 const { loadPlugins } = require('./core/pluginLoader');
+const { bootstrapAdmin } = require('./core/bootstrapAdmin');
 const logger = require('./core/logger');
 
-const loadedPlugins = loadPlugins({ logger, config });
-logger.info(`Betoltott pluginok (${loadedPlugins.length}): ${loadedPlugins.join(', ') || '-'}`);
+async function start() {
+  await bootstrapAdmin();
 
-const app = createApp();
+  const loadedPlugins = loadPlugins({ logger, config });
+  logger.info(`Betoltott pluginok (${loadedPlugins.length}): ${loadedPlugins.join(', ') || '-'}`);
 
-app.listen(config.port, async () => {
-  const { version, versionName } = config.versionInfo;
-  logger.info(`AG-CMS backend fut: http://localhost:${config.port} - v${version} (${versionName})`);
-  await hooks.trigger('server:ready', { port: config.port });
+  const app = createApp();
+
+  app.listen(config.port, async () => {
+    const { version, versionName } = config.versionInfo;
+    logger.info(`AG-CMS szerver fut: http://localhost:${config.port} - v${version} (${versionName})`);
+    await hooks.trigger('server:ready', { port: config.port });
+  });
+}
+
+start().catch((err) => {
+  logger.error('Nem sikerult elinditani a szervert:', err);
+  process.exit(1);
 });

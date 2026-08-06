@@ -1,4 +1,6 @@
 process.env.ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || require('crypto').randomBytes(32).toString('hex');
+process.env.JWT_SECRET = process.env.JWT_SECRET || require('crypto').randomBytes(32).toString('hex');
+process.env.COOKIE_SECRET = process.env.COOKIE_SECRET || require('crypto').randomBytes(32).toString('hex');
 process.env.NODE_ENV = 'test';
 
 const test = require('node:test');
@@ -67,6 +69,25 @@ test('concurrent update() calls are serialized and do not lose writes', async ()
   );
 
   assert.equal(store.read().counter, 20);
+
+  fs.rmSync(tmpDir, { recursive: true, force: true });
+});
+
+test('a rejected update() does not permanently break the write queue', async () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'agcms-test-'));
+  const store = new EncryptedJSONStore('queue-test', { count: 0 }, tmpDir);
+
+  await assert.rejects(
+    store.update(() => {
+      throw new Error('boom');
+    })
+  );
+
+  const result = await store.update((data) => {
+    data.count += 1;
+    return data;
+  });
+  assert.equal(result.count, 1);
 
   fs.rmSync(tmpDir, { recursive: true, force: true });
 });

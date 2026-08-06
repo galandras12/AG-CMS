@@ -1,0 +1,133 @@
+:root {
+  --bg: #1f2124;
+  --bg-card: #2a2d31;
+  --text: #f1f1f1;
+  --text-muted: #9a9ea3;
+  --border: #3a3d42;
+  --accent: #4f8cff;
+  --error: #ff6b6b;
+}
+
+:root[data-theme="light"] {
+  --bg: #f5f6f7;
+  --bg-card: #ffffff;
+  --text: #1c1e21;
+  --text-muted: #6b7280;
+  --border: #e2e4e8;
+  --accent: #2563eb;
+  --error: #dc2626;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.agcms-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.agcms-brand {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.agcms-topbar-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.agcms-btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 0.35rem 0.6rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.agcms-btn-ghost:hover {
+  border-color: var(--accent);
+}
+
+.agcms-main {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 1rem;
+}
+
+.agcms-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 420px;
+  width: 100%;
+}
+
+.agcms-card--center {
+  text-align: center;
+}
+
+.agcms-card h1 {
+  margin-top: 0;
+  font-size: 1.3rem;
+}
+
+.agcms-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  text-align: left;
+}
+
+.agcms-card label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.agcms-card input {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 0.55rem 0.7rem;
+  font-size: 1rem;
+}
+
+.agcms-card button[type="submit"],
+#logout-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.agcms-error {
+  color: var(--error);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.agcms-muted {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}

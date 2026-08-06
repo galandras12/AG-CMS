@@ -33,15 +33,15 @@ backend éppen nem fut. Az admin felület és API viszont csak akkor
 AG-CMS/
 ├── server/             # Express szerver, API, core logika
 │   ├── config/         # env + connection.json + version.json betoltese
-│   ├── core/            # crypto, encrypted store, hook rendszer, plugin loader, logger
-│   ├── middleware/      # auth, rate limit, szerepkor-ellenorzes (2. fazis)
-│   ├── models/          # adatelerest wrapperek (3. fazis)
-│   ├── routes/          # API vegpontok
+│   ├── core/            # crypto, encrypted store, hook rendszer, plugin loader, jwt, logger
+│   ├── middleware/      # auth (JWT+cookie), rate limit, szerepkor-ellenorzes
+│   ├── models/          # users.model.js (tovabbi modellek: 3. fazis)
+│   ├── routes/          # API vegpontok (health, auth, users, ...)
 │   ├── services/        # statikus generator (4. fazis)
 │   ├── tests/           # node:test tesztek
 │   ├── app.js
 │   └── server.js
-├── frontend/admin/      # admin UI statikus fajljai (2-3. fazis)
+├── frontend/admin/      # admin login + minimal dashboard (teljes UI: 3. fazis)
 ├── public/              # generalt statikus oldal kimenete
 ├── themes/              # frontend sablonok (4. fazis)
 ├── content/
@@ -104,9 +104,9 @@ A projekt lépésről lépésre épül fel:
 1. ✅ **Alapváz + titkosított tárolás** - Express skeleton, AES-256-GCM
    encrypted JSON store engine, hook/plugin rendszer, config loader,
    `langs/` scaffold, automatizált tesztek.
-2. ⏳ **Authentikáció** - bcrypt jelszavak, JWT + HttpOnly cookie, admin/
-   szerkesztő szerepkörök, brute force védelem (rate limiting), admin
-   login UI.
+2. ✅ **Authentikáció** - bcrypt (bcryptjs) jelszavak, JWT + HttpOnly
+   cookie, admin/szerkesztő szerepkörök, brute force védelem (rate
+   limiting), admin login UI + minimál irányítópult.
 3. ⏳ **Admin CRUD** - bejegyzések (draft/ütemezett/publikált), média,
    felhasználók, Személyre szabás (site név/leírás/favicon/logó/banner,
    widgetek, sitemap/robots.txt), testreszabható (drag-and-drop) dashboard.
@@ -143,3 +143,31 @@ Első fázis: projekt alapváz.
   és hozzá egy `start.bat` Windows indítószkript, ami ellenőrzi a Node.js
   meglétét, előkészíti a `.env`-et, telepíti a függőségeket, és elindítja
   a szervert.
+- **Authentikáció**: felhasználók titkosított tárolása (`server/models/users.model.js`),
+  jelszavak **bcrypt** hash-eléssel (`bcryptjs`, cost 12) - soha plain
+  textben. A felhasználónév-egyediség ellenőrzése atomi a titkosított
+  tárolóval (két egyidejű regisztráció nem hozhat létre azonos nevű fiókot).
+- **JWT + HttpOnly, aláírt cookie** alapú session (`server/core/jwt.js`,
+  `server/middleware/auth.middleware.js`) - `POST /api/auth/login`,
+  `POST /api/auth/logout`, `GET /api/auth/me`.
+- **Admin / szerkesztő szerepkörök** (`requireRole()` middleware) - a
+  felhasználókezelő API (`GET/POST/PATCH/DELETE /api/users`) csak admin
+  számára elérhető, véd az utolsó admin fiók törlése/leléptetése ellen.
+- **Brute force védelem**: `express-rate-limit` a bejelentkezésen (10
+  próbálkozás / 15 perc / IP).
+- **Első admin fiók automatikus létrehozása** induláskor
+  (`server/core/bootstrapAdmin.js`), ha még nincs felhasználó - `ADMIN_USERNAME`/
+  `ADMIN_PASSWORD` env változóból, vagy véletlen generált jelszóval (egyszer
+  kiírva a szerver indítási logjába).
+- **Admin frontend alapja** (`frontend/admin/`) - statikus HTML/CSS/vanilla
+  JS, ami induláskor beolvassa a `config/connection.json`-t (nincs
+  hardcode-olt backend URL), health-checkkel jelzi ha nincs kapcsolat,
+  bejelentkezés utáni minimál nézettel (a teljes irányítópult a 3.
+  fázisban készül). Sötétszürke/fehér téma-váltó és HU/EN nyelv-váltó.
+- A `server/core/store.js` írási sorában **javítva egy race condition**:
+  egy elutasított (hibázó) `update()` hívás korábban véglegesen
+  megszakította a store további írásait - most csak az adott hívás bukik
+  el, a sor tovább működik.
+- Új automatizált tesztek: `users.model.test.js`, `auth.test.js` (élő
+  HTTP kérésekkel a bejelentkezésre, szerepkör-védelemre, felhasználó
+  CRUD-ra), és egy regressziós teszt a store race condition javítására.
