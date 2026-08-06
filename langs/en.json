@@ -1,0 +1,32 @@
+{
+  "common": {
+    "appName": "AG-CMS",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "yes": "Yes",
+    "no": "No",
+    "buildNow": "Build now"
+  },
+  "auth": {
+    "loginTitle": "Sign in",
+    "username": "Username",
+    "password": "Password",
+    "loginButton": "Sign in",
+    "logoutButton": "Sign out",
+    "loginError": "Invalid username or password.",
+    "noConnection": "Cannot reach the admin server.",
+    "rateLimited": "Too many login attempts. Please try again later."
+  },
+  "roles": {
+    "admin": "Administrator",
+    "editor": "Editor"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "systemBlockTitle": "AG-CMS system status",
+    "changelogTitle": "Recent changes"
+  }
+}
