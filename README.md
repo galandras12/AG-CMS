@@ -33,15 +33,15 @@ backend éppen nem fut. Az admin felület és API viszont csak akkor
 AG-CMS/
 ├── server/             # Express szerver, API, core logika
 │   ├── config/         # env + connection.json + version.json betoltese
-│   ├── core/            # crypto, encrypted store, hook rendszer, plugin loader, jwt, logger
+│   ├── core/            # crypto, encrypted store, hook/plugin rendszer, admin menu, jwt, logger
 │   ├── middleware/      # auth (JWT+cookie), rate limit, szerepkor-ellenorzes
-│   ├── models/          # users.model.js (tovabbi modellek: 3. fazis)
-│   ├── routes/          # API vegpontok (health, auth, users, ...)
+│   ├── models/          # users, posts, media, settings, widgets, dashboardLayout
+│   ├── routes/          # API vegpontok (health, auth, users, posts, media, settings, widgets, dashboard, admin menu)
 │   ├── services/        # statikus generator (4. fazis)
 │   ├── tests/           # node:test tesztek
 │   ├── app.js
 │   └── server.js
-├── frontend/admin/      # admin login + minimal dashboard (teljes UI: 3. fazis)
+├── frontend/admin/      # teljes admin SPA: login, dashboard, bejegyzesek, media, szemelyre szabas, felhasznalok
 ├── public/              # generalt statikus oldal kimenete
 ├── themes/              # frontend sablonok (4. fazis)
 ├── content/
@@ -107,7 +107,7 @@ A projekt lépésről lépésre épül fel:
 2. ✅ **Authentikáció** - bcrypt (bcryptjs) jelszavak, JWT + HttpOnly
    cookie, admin/szerkesztő szerepkörök, brute force védelem (rate
    limiting), admin login UI + minimál irányítópult.
-3. ⏳ **Admin CRUD** - bejegyzések (draft/ütemezett/publikált), média,
+3. ✅ **Admin CRUD** - bejegyzések (draft/ütemezett/publikált), média,
    felhasználók, Személyre szabás (site név/leírás/favicon/logó/banner,
    widgetek, sitemap/robots.txt), testreszabható (drag-and-drop) dashboard.
 4. ⏳ **Statikus generálás + témaváltás** - 3 beépített téma, build script,
@@ -171,3 +171,45 @@ Első fázis: projekt alapváz.
 - Új automatizált tesztek: `users.model.test.js`, `auth.test.js` (élő
   HTTP kérésekkel a bejelentkezésre, szerepkör-védelemre, felhasználó
   CRUD-ra), és egy regressziós teszt a store race condition javítására.
+- **Bejegyzések** (`server/models/posts.model.js`, `/api/posts`): cím,
+  slug (automatikus + egyedi ütközéskezeléssel), kivonat, Markdown
+  tartalom, piszkozat/ütemezett/publikált státusz (`publishAt` alapján
+  automatikusan "publikálttá" váló ütemezett bejegyzésekkel). A
+  `post:beforeSave`/`post:afterSave`/`post:beforeDelete` hook-ok aktívak.
+- **Médiatár** (`server/models/media.model.js`, `/api/media`): kép
+  feltöltés (`multer`, típus- és méretkorlátozással, max 10 MB), a
+  fájlok a `content/media/` alatt (nem titkosítva, mivel közvetlenül
+  kiszolgálandó binárisok), metaadatuk (alt szöveg, feltöltő, dátum)
+  titkosítva. A `media:afterUpload` hook aktív.
+- **Személyre szabás** (`server/models/settings.model.js`, `/api/settings`):
+  site név/leírás, favicon/logó/banner (médiatárból kiválasztva),
+  sitemap.xml és robots.txt be/kikapcsolása + `robots.txt` tartalom
+  szerkesztése. Az olvasás publikus, a szerkesztés admin-only.
+- **Widgetek** (`server/models/widgets.model.js`, `/api/widgets`):
+  szöveg/legutóbbi bejegyzések/közösségi linkek típusú widgetek,
+  oldalsáv/lábjegyzet régiónkban, sorrend állítható.
+- **Admin irányítópult** (`server/models/dashboardLayout.model.js`,
+  `/api/dashboard`): az első blokk (AG-CMS név, verzió, frissítés
+  dátuma, rövid changelog a `config/changelog.json`-ból) mindig fix és
+  megváltozhatatlan; a további blokkok (legutóbbi bejegyzések, gyors
+  műveletek, felhasználó- és médiaösszesítő) **valódi HTML5
+  drag-and-drop**-pal átrendezhetők és elrejthetők/visszahozhatók,
+  felhasználónként elmentve.
+- **Admin menü bővíthetőség**: az `admin:menu:register` hook induláskor
+  fut, plugin-ek saját menüpontot adhatnak az oldalsávhoz (lásd
+  `plugins/sample-menu-item`) - a menü szerepkör szerint szűrve
+  (`GET /api/admin/menu`).
+- **Teljes admin SPA** (`frontend/admin/`): hash-alapú router, oldalsáv
+  navigáció (a menüt a backend-ből tölti), Irányítópult/Bejegyzések/
+  Média/Személyre szabás/Felhasználók oldalak, mind HU/EN fordítással
+  és sötétszürke/fehér témával. Szerkesztő szerepkörnél a Személyre
+  szabás mezői írásvédettek (csak admin szerkesztheti), a Felhasználók
+  menüpont nem is jelenik meg.
+- Az admin/szerkesztő szerepkör-korlátozásokat, a bejegyzés/média/
+  widget/dashboard API-kat és a plugin-alapú menübővítést új
+  automatizált tesztek fedik (`content.test.js`, összesen 26 teszt,
+  mind zöld), és valós böngészőben (Playwright/Chromium) is
+  végigteszteltem: bejelentkezés, oldalváltás mind az öt admin
+  oldalon, bejegyzés létrehozása, drag-and-drop sorrend mentése és
+  betöltés utáni megmaradása, valamint a szerkesztői szerepkör
+  korlátozásainak megjelenése a felületen.

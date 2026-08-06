@@ -8,6 +8,12 @@ const logger = require('./core/logger');
 const healthRoutes = require('./routes/health.routes');
 const authRoutes = require('./routes/auth.routes');
 const usersRoutes = require('./routes/users.routes');
+const postsRoutes = require('./routes/posts.routes');
+const mediaRoutes = require('./routes/media.routes');
+const settingsRoutes = require('./routes/settings.routes');
+const widgetsRoutes = require('./routes/widgets.routes');
+const dashboardRoutes = require('./routes/dashboard.routes');
+const adminMenuRoutes = require('./routes/adminMenu.routes');
 
 function createApp() {
   const app = express();
@@ -27,6 +33,9 @@ function createApp() {
   app.use('/admin', express.static(path.join(config.rootDir, 'frontend', 'admin')));
   app.use('/config', express.static(path.join(config.rootDir, 'config')));
   app.use('/langs', express.static(path.join(config.rootDir, 'langs')));
+  // Feltoltott mediafajlok - nyilvanosan olvashatok (posztokba, personalizaciohoz beagyazva),
+  // az irasuk (upload/torles) auth-hoz kotott a /api/media alatt.
+  app.use('/media', express.static(config.mediaDir));
   app.use(express.static(path.join(config.rootDir, 'public')));
 
   app.get('/', (req, res) => {
@@ -38,6 +47,12 @@ function createApp() {
   app.use('/api/health', healthRoutes);
   app.use('/api/auth', authRoutes);
   app.use('/api/users', usersRoutes);
+  app.use('/api/posts', postsRoutes);
+  app.use('/api/media', mediaRoutes);
+  app.use('/api/settings', settingsRoutes);
+  app.use('/api/widgets', widgetsRoutes);
+  app.use('/api/dashboard', dashboardRoutes);
+  app.use('/api/admin', adminMenuRoutes);
 
   app.use((req, res) => {
     res.status(404).json({ error: 'Not found' });

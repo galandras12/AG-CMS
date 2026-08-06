@@ -1,0 +1,8 @@
+{
+  "name": "sample-menu-item",
+  "version": "1.0.0",
+  "author": "AG-CMS",
+  "description": "Minta plugin: uj menupontot ad az admin oldalsavhoz az admin:menu:register hookon keresztul.",
+  "main": "index.js",
+  "enabled": true
+}

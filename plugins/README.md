@@ -49,11 +49,11 @@ engedélyezett pluginra. A `context` tartalmazza: `logger`, `config`,
 |------------------------|----------------------------------------------|----------|---------|
 | `server:ready`         | A HTTP szerver elindult és figyel            | 1        | aktív |
 | `auth:afterLogin`      | Sikeres bejelentkezés után                   | 2        | aktív |
-| `post:beforeSave`      | Bejegyzés mentése előtt (módosíthatja)       | 3        | tervezett |
-| `post:afterSave`       | Bejegyzés mentése után                       | 3        | tervezett |
-| `post:beforeDelete`    | Bejegyzés törlése előtt                      | 3        | tervezett |
-| `media:afterUpload`    | Médiafájl feltöltése után                    | 3        | tervezett |
-| `admin:menu:register`  | Admin oldalsáv menüpontok összeállításakor   | 3        | tervezett |
+| `post:beforeSave`      | Bejegyzés mentése előtt (módosíthatja)       | 3        | aktív |
+| `post:afterSave`       | Bejegyzés mentése után                       | 3        | aktív |
+| `post:beforeDelete`    | Bejegyzés törlése előtt                      | 3        | aktív |
+| `media:afterUpload`    | Médiafájl feltöltése után                    | 3        | aktív |
+| `admin:menu:register`  | Induláskor, az admin oldalsáv menü összeállításakor (payload: `{ registerItem(item) }`) | 3 | aktív |
 | `build:beforeGenerate` | Statikus generálás indulása előtt            | 4        | tervezett |
 | `build:afterGenerate`  | Statikus generálás befejezése után           | 4        | tervezett |
 
@@ -61,4 +61,23 @@ Az "aktív" hook-ok már be vannak kötve a core kódba. A "tervezett" hook-ok a
 jelzett fázisban kerülnek be - ha egy plugin ezekre hookol most, egyszerűen
 soha nem fog aktiválódni, amíg a core az adott fázisban meg nem hívja őket.
 
-Lásd a `plugins/sample-hello-logger/` mappát egy működő, minimális példáért.
+### `admin:menu:register` - saját menüpont hozzáadása
+
+```js
+function register(hooks) {
+  hooks.on('admin:menu:register', ({ registerItem }) => {
+    registerItem({ id: 'sajat-menupont', label: 'nav.sajat', icon: '⭐', order: 500, url: 'https://example.com' });
+  });
+}
+module.exports = { register };
+```
+
+Az `id` és `label` mező kötelező. A `label` egy `langs/*.json` kulcs (pl.
+`nav.sajat`), amit az admin frontend fordít - ha a kulcs nincs a nyelvi
+fájlban, a kulcs önmaga jelenik meg. Az `url` mezővel a menüpont egy külső
+linkre mutat (új lapon nyílik); nélküle az admin frontendnek saját logikával
+kell kezelnie az adott `id`-t (jövőbeli bővítési pont).
+
+Lásd a `plugins/sample-hello-logger/` (post/media hookok) és a
+`plugins/sample-menu-item/` (admin:menu:register) mappákat működő
+példákért.
