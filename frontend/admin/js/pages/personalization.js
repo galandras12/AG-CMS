@@ -30,6 +30,9 @@ window.AGCMS_PAGES.personalization = async function renderPersonalization(contai
         <label>${escapeHtml(t('personalization.fieldSiteDescription'))}
           <textarea name="siteDescription" rows="2" ${disabledAttr}>${escapeHtml(settings.siteDescription)}</textarea>
         </label>
+        <label>${escapeHtml(t('personalization.fieldSiteUrl'))}
+          <input type="text" name="siteUrl" placeholder="https://example.com" value="${escapeHtml(settings.siteUrl || '')}" ${disabledAttr} />
+        </label>
         <div class="agcms-form-row">
           ${renderMediaPicker('faviconUrl', t('personalization.fieldFavicon'), settings.faviconUrl)}
           ${renderMediaPicker('logoUrl', t('personalization.fieldLogo'), settings.logoUrl)}
@@ -53,6 +56,7 @@ window.AGCMS_PAGES.personalization = async function renderPersonalization(contai
         <label>${escapeHtml(t('personalization.fieldRobotsTxt'))}
           <textarea name="robotsTxt" rows="4" class="agcms-mono" ${disabledAttr}>${escapeHtml(settings.seo.robotsTxt)}</textarea>
         </label>
+        ${!settings.siteUrl ? `<p class="agcms-muted">${escapeHtml(t('personalization.sitemapNeedsUrl'))}</p>` : ''}
         ${isAdmin ? `<div class="agcms-form-actions"><button type="submit" class="agcms-btn">${escapeHtml(t('common.save'))}</button></div>` : ''}
       </form>
     </section>
@@ -163,6 +167,7 @@ window.AGCMS_PAGES.personalization = async function renderPersonalization(contai
         body: JSON.stringify({
           siteName: form.siteName.value,
           siteDescription: form.siteDescription.value,
+          siteUrl: form.siteUrl.value.trim(),
           faviconUrl: form.faviconUrl.value,
           logoUrl: form.logoUrl.value,
           bannerUrl: form.bannerUrl.value,

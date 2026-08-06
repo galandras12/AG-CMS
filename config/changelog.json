@@ -5,11 +5,11 @@
       "versionName": "Alma",
       "date": "2026-08-06",
       "items": [
+        "Statikus generálás + 3 téma (Modern Trendi fekete, Modern Minimalista sötétszürke, Szolid letisztult fehér) témaváltóval",
         "Admin CRUD: bejegyzések (piszkozat/ütemezett/publikált), médiatár, felhasználók",
         "Személyre szabás: site név/leírás/favicon/logó/banner, sitemap és robots.txt kapcsoló+szerkesztő",
         "Widgetek (sidebar/footer) és húzd-és-dobd admin irányítópult blokkok",
-        "Authentikáció: bcrypt jelszavak, JWT + HttpOnly cookie, szerepkörök, brute force védelem",
-        "Alapváz: titkosított JSON tárolás, hook/plugin rendszer, Express szerver"
+        "Authentikáció: bcrypt jelszavak, JWT + HttpOnly cookie, szerepkörök, brute force védelem"
       ]
     }
   ]

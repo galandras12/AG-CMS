@@ -14,6 +14,8 @@ const settingsRoutes = require('./routes/settings.routes');
 const widgetsRoutes = require('./routes/widgets.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
 const adminMenuRoutes = require('./routes/adminMenu.routes');
+const buildRoutes = require('./routes/build.routes');
+const themesRoutes = require('./routes/themes.routes');
 
 function createApp() {
   const app = express();
@@ -36,7 +38,9 @@ function createApp() {
   // Feltoltott mediafajlok - nyilvanosan olvashatok (posztokba, personalizaciohoz beagyazva),
   // az irasuk (upload/torles) auth-hoz kotott a /api/media alatt.
   app.use('/media', express.static(config.mediaDir));
-  app.use(express.static(path.join(config.rootDir, 'public')));
+  // Tema elonezetek (theme.json + preview kep) - a temavalaszto galeriahoz.
+  app.use('/themes', express.static(path.join(config.rootDir, 'themes')));
+  app.use(express.static(config.publicDir));
 
   app.get('/', (req, res) => {
     // Amig nincs generalt statikus oldal (public/index.html, 4. fazis),
@@ -53,6 +57,8 @@ function createApp() {
   app.use('/api/widgets', widgetsRoutes);
   app.use('/api/dashboard', dashboardRoutes);
   app.use('/api/admin', adminMenuRoutes);
+  app.use('/api/build', buildRoutes);
+  app.use('/api/themes', themesRoutes);
 
   app.use((req, res) => {
     res.status(404).json({ error: 'Not found' });

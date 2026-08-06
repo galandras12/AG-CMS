@@ -4,6 +4,9 @@ const hooks = require('../core/hooks');
 
 const store = getStore('posts', { posts: [] });
 const VALID_STATUS = ['draft', 'scheduled', 'published'];
+// A statikus generator "index.html"-t ir a fooldalnak - egy "index" slugu
+// bejegyzes felulirna azt, ezert ezt a slugot sosem engedjuk kiadni.
+const RESERVED_SLUGS = ['index'];
 
 function slugify(value) {
   const base = (value || '')
@@ -30,7 +33,7 @@ function withEffectiveStatus(post) {
 }
 
 function uniqueSlug(posts, baseSlug, excludeId) {
-  let slug = baseSlug;
+  let slug = RESERVED_SLUGS.includes(baseSlug) ? `${baseSlug}-post` : baseSlug;
   let i = 2;
   while (posts.some((p) => p.slug === slug && p.id !== excludeId)) {
     slug = `${baseSlug}-${i}`;
@@ -126,6 +129,8 @@ async function remove(id) {
     }
     return data;
   });
+
+  await hooks.trigger('post:afterDelete', existing);
 }
 
 module.exports = { list, findByIdRaw, create, update, remove, VALID_STATUS, slugify };

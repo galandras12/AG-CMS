@@ -7,6 +7,7 @@ const DEFAULT_MENU = [
   { id: 'dashboard', label: 'nav.dashboard', icon: '🏠', order: 0 },
   { id: 'posts', label: 'nav.posts', icon: '📝', order: 10 },
   { id: 'media', label: 'nav.media', icon: '🖼️', order: 20 },
+  { id: 'themes', label: 'nav.themes', icon: '🎭', order: 25 },
   { id: 'personalization', label: 'nav.personalization', icon: '🎨', order: 30 },
   { id: 'users', label: 'nav.users', icon: '👤', order: 40, roles: ['admin'] },
 ];
