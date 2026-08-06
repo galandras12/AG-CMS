@@ -141,3 +141,13 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# AG-CMS: titkositott adatfajlok es feltoltott media - futasidoben generalodnak,
+# soha nem kerulnek verziokezelesbe.
+content/data/*.enc
+content/media/*
+!content/media/.gitkeep
+
+# AG-CMS: a build script altal generalt statikus kimenet.
+public/*
+!public/.gitkeep

@@ -1,0 +1,8 @@
+{
+  "name": "sample-hello-logger",
+  "version": "1.0.0",
+  "author": "AG-CMS",
+  "description": "Minta plugin: a szerver inditasakor logol, bemutatja a hook rendszer hasznalatat.",
+  "main": "index.js",
+  "enabled": true
+}

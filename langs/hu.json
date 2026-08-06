@@ -1,0 +1,32 @@
+{
+  "common": {
+    "appName": "AG-CMS",
+    "loading": "Betöltés...",
+    "save": "Mentés",
+    "cancel": "Mégse",
+    "delete": "Törlés",
+    "edit": "Szerkesztés",
+    "yes": "Igen",
+    "no": "Nem",
+    "buildNow": "Build most"
+  },
+  "auth": {
+    "loginTitle": "Bejelentkezés",
+    "username": "Felhasználónév",
+    "password": "Jelszó",
+    "loginButton": "Bejelentkezés",
+    "logoutButton": "Kijelentkezés",
+    "loginError": "Hibás felhasználónév vagy jelszó.",
+    "noConnection": "Nincs kapcsolat az admin szerverrel.",
+    "rateLimited": "Túl sok bejelentkezési próbálkozás. Kérlek próbáld később."
+  },
+  "roles": {
+    "admin": "Admin",
+    "editor": "Szerkesztő"
+  },
+  "dashboard": {
+    "title": "Irányítópult",
+    "systemBlockTitle": "AG-CMS rendszerállapot",
+    "changelogTitle": "Legutóbbi változások"
+  }
+}
