@@ -19,7 +19,7 @@ function findByIdRaw(id) {
   return store.read().items.find((m) => m.id === id) || null;
 }
 
-async function registerUpload({ originalName, mimeType, size, storedFilename, uploadedBy }) {
+async function registerUpload({ originalName, mimeType, size, storedFilename, uploadedBy, altText }) {
   const item = {
     id: crypto.randomUUID(),
     filename: storedFilename,
@@ -27,7 +27,7 @@ async function registerUpload({ originalName, mimeType, size, storedFilename, up
     originalName,
     mimeType,
     size,
-    altText: '',
+    altText: altText || '',
     uploadedBy,
     uploadedAt: new Date().toISOString(),
   };

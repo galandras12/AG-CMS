@@ -58,6 +58,7 @@ engedélyezett pluginra. A `context` tartalmazza: `logger`, `config`,
 | `widgets:afterChange`  | Widget létrehozás/módosítás/törlés/átrendezés után | 4 | aktív |
 | `build:beforeGenerate` | Statikus generálás indulása előtt            | 4        | aktív |
 | `build:afterGenerate`  | Statikus generálás befejezése után (payload: `{ generatedAt, postCount, theme }`) | 4 | aktív |
+| `render:beforeWrite`   | Minden legenerált oldal (index + minden bejegyzés) HTML-jének lemezre írása előtt (payload: `{ html, pageType: 'index'\|'post', site, post? }`) - a handler visszaadhat egy módosított `html`-t tartalmazó payloadot | - | aktív |
 
 Az "aktív" hook-ok már be vannak kötve a core kódba. A "tervezett" hook-ok a
 jelzett fázisban kerülnek be - ha egy plugin ezekre hookol most, egyszerűen
@@ -80,9 +81,28 @@ fájlban, a kulcs önmaga jelenik meg. Az `url` mezővel a menüpont egy külső
 linkre mutat (új lapon nyílik); nélküle az admin frontendnek saját logikával
 kell kezelnie az adott `id`-t (jövőbeli bővítési pont).
 
-Lásd a `plugins/sample-hello-logger/` (post/media hookok) és a
-`plugins/sample-menu-item/` (admin:menu:register) mappákat működő
-példákért.
+### `render:beforeWrite` - tartalom beszúrása a generált oldalakba
+
+```js
+function register(hooks) {
+  hooks.on('render:beforeWrite', (payload) => {
+    if (!payload.html.includes('</body>')) return payload;
+    const html = payload.html.replace('</body>', '<div>Sajat tartalom</div>\n</body>');
+    return { ...payload, html };
+  });
+}
+module.exports = { register };
+```
+
+Ez a hook minden legenerált publikus oldalra lefut (a főoldalra és minden
+bejegyzésre is), közvetlenül a fájl lemezre írása előtt - ide illik pl.
+egy cookie-értesítő, egy analitika-kód beillesztése, vagy bármi, amit
+minden oldalon meg kell jeleníteni.
+
+Lásd a `plugins/sample-hello-logger/` (post/media hookok), a
+`plugins/sample-menu-item/` (admin:menu:register) és a
+`plugins/cookie-consent/` (render:beforeWrite - EU/GDPR sütiértesítő
+sáv) mappákat működő példákért.
 
 ### Automatikus statikus generálás
 

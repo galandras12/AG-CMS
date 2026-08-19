@@ -1,6 +1,6 @@
 window.AGCMS_PAGES = window.AGCMS_PAGES || {};
 
-window.AGCMS_PAGES.personalization = async function renderPersonalization(container, params, ctx) {
+window.AGCMS_PAGES.personalization = async function renderPersonalization(container, params, ctx, pendingAssets = {}) {
   const { t, apiFetch, user } = ctx;
   const { escapeHtml, toast, readJsonSafe } = window.AGCMS_UI;
   const isAdmin = user.role === 'admin';
@@ -14,6 +14,13 @@ window.AGCMS_PAGES.personalization = async function renderPersonalization(contai
   const { settings } = await settingsRes.json();
   const { widgets } = await widgetsRes.json();
   const { media } = await mediaRes.json();
+
+  // A meg nem mentett favicon/logo/banner kivalasztas megmarad egy
+  // teljes ujra-renderelesen at is (pl. feltoltes vagy torles utan),
+  // amig a felhasznalo tenylegesen el nem menti a formot.
+  if (pendingAssets.faviconUrl !== undefined) settings.faviconUrl = pendingAssets.faviconUrl;
+  if (pendingAssets.logoUrl !== undefined) settings.logoUrl = pendingAssets.logoUrl;
+  if (pendingAssets.bannerUrl !== undefined) settings.bannerUrl = pendingAssets.bannerUrl;
 
   const disabledAttr = isAdmin ? '' : 'disabled';
 
@@ -34,9 +41,9 @@ window.AGCMS_PAGES.personalization = async function renderPersonalization(contai
           <input type="text" name="siteUrl" placeholder="https://example.com" value="${escapeHtml(settings.siteUrl || '')}" ${disabledAttr} />
         </label>
         <div class="agcms-form-row">
-          ${renderMediaPicker('faviconUrl', t('personalization.fieldFavicon'), settings.faviconUrl)}
-          ${renderMediaPicker('logoUrl', t('personalization.fieldLogo'), settings.logoUrl)}
-          ${renderMediaPicker('bannerUrl', t('personalization.fieldBanner'), settings.bannerUrl)}
+          ${renderAssetPicker('faviconUrl', t('personalization.fieldFavicon'), settings.faviconUrl)}
+          ${renderAssetPicker('logoUrl', t('personalization.fieldLogo'), settings.logoUrl)}
+          ${renderAssetPicker('bannerUrl', t('personalization.fieldBanner'), settings.bannerUrl)}
         </div>
         ${isAdmin ? `<div class="agcms-form-actions"><button type="submit" class="agcms-btn">${escapeHtml(t('common.save'))}</button></div>` : ''}
       </form>
@@ -62,6 +69,32 @@ window.AGCMS_PAGES.personalization = async function renderPersonalization(contai
     </section>
 
     <section class="agcms-card agcms-card--wide">
+      <h2>${escapeHtml(t('personalization.cookieConsentTitle'))}</h2>
+      <p class="agcms-muted">${escapeHtml(t('personalization.cookieConsentHint'))}</p>
+      <form id="cookie-consent-form" class="agcms-form">
+        <label class="agcms-checkbox">
+          <input type="checkbox" name="cookieConsentEnabled" ${settings.cookieConsent.enabled ? 'checked' : ''} ${disabledAttr} />
+          ${escapeHtml(t('personalization.cookieConsentEnabled'))}
+        </label>
+        <label>${escapeHtml(t('personalization.fieldCookieMessage'))}
+          <textarea name="cookieConsentMessage" rows="3" ${disabledAttr}>${escapeHtml(settings.cookieConsent.message)}</textarea>
+        </label>
+        <div class="agcms-form-row">
+          <label>${escapeHtml(t('personalization.fieldCookieAcceptLabel'))}
+            <input type="text" name="cookieConsentAcceptLabel" value="${escapeHtml(settings.cookieConsent.acceptLabel)}" ${disabledAttr} />
+          </label>
+          <label>${escapeHtml(t('personalization.fieldCookieLearnMoreLabel'))}
+            <input type="text" name="cookieConsentLearnMoreLabel" value="${escapeHtml(settings.cookieConsent.learnMoreLabel)}" ${disabledAttr} />
+          </label>
+          <label>${escapeHtml(t('personalization.fieldCookieLearnMoreUrl'))}
+            <input type="text" name="cookieConsentLearnMoreUrl" placeholder="https://example.com/adatvedelem" value="${escapeHtml(settings.cookieConsent.learnMoreUrl)}" ${disabledAttr} />
+          </label>
+        </div>
+        ${isAdmin ? `<div class="agcms-form-actions"><button type="submit" class="agcms-btn">${escapeHtml(t('common.save'))}</button></div>` : ''}
+      </form>
+    </section>
+
+    <section class="agcms-card agcms-card--wide">
       <h2>${escapeHtml(t('personalization.widgetsTitle'))}</h2>
       <form id="widget-add-form" class="agcms-form agcms-form--inline">
         <select name="type">
@@ -81,18 +114,70 @@ window.AGCMS_PAGES.personalization = async function renderPersonalization(contai
     </section>
   `;
 
-  function renderMediaPicker(field, label, value) {
+  function renderAssetPicker(field, label, value) {
+    const recent = media.slice(0, 5);
     return `
-      <label>${escapeHtml(label)}
-        <select name="${field}" ${disabledAttr}>
-          <option value="">${escapeHtml(t('common.none'))}</option>
-          ${media
-            .map((m) => `<option value="${escapeHtml(m.url)}" ${m.url === value ? 'selected' : ''}>${escapeHtml(m.originalName)}</option>`)
-            .join('')}
-        </select>
-        ${value ? `<img class="agcms-media-preview" src="${escapeHtml(value)}" alt="" />` : ''}
-      </label>
+      <div class="agcms-asset-picker" data-field="${field}">
+        <span class="agcms-field-label">${escapeHtml(label)}</span>
+        <div class="agcms-asset-current">${renderCurrentPreview(value)}</div>
+        <ul class="agcms-asset-list">
+          ${
+            recent
+              .map(
+                (m) => `
+            <li class="agcms-asset-item ${m.url === value ? 'agcms-asset-item--selected' : ''}" data-url="${escapeHtml(m.url)}">
+              <img src="${escapeHtml(m.url)}" class="agcms-asset-thumb" alt="" />
+              <span class="agcms-asset-name">${escapeHtml(m.altText || m.originalName)}</span>
+              ${
+                isAdmin
+                  ? `<button type="button" class="agcms-asset-select" data-field="${field}" data-url="${escapeHtml(m.url)}">${escapeHtml(t('personalization.select'))}</button>
+                     <button type="button" class="agcms-asset-delete" data-id="${m.id}" title="${escapeHtml(t('common.delete'))}">&times;</button>`
+                  : ''
+              }
+            </li>
+          `
+              )
+              .join('') || `<li class="agcms-muted">${escapeHtml(t('common.none'))}</li>`
+          }
+        </ul>
+        <input type="hidden" name="${field}" value="${escapeHtml(value || '')}" />
+        ${
+          isAdmin
+            ? `<button type="button" class="agcms-btn-ghost agcms-btn--sm agcms-asset-upload-toggle" data-field="${field}">${escapeHtml(t('common.upload'))}</button>
+               <div class="agcms-asset-upload-form" data-field="${field}" hidden>
+                 <input type="file" class="agcms-asset-upload-file" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml" />
+                 <input type="text" class="agcms-asset-upload-label" placeholder="${escapeHtml(t('personalization.fieldAssetLabel'))}" />
+                 <button type="button" class="agcms-btn agcms-btn--sm agcms-asset-upload-submit" data-field="${field}">${escapeHtml(t('common.upload'))}</button>
+                 <p class="agcms-error" hidden></p>
+               </div>`
+            : ''
+        }
+      </div>
     `;
+  }
+
+  function renderCurrentPreview(value) {
+    return value
+      ? `<img src="${escapeHtml(value)}" class="agcms-asset-current-img" alt="" />`
+      : `<span class="agcms-muted">${escapeHtml(t('common.none'))}</span>`;
+  }
+
+  function currentAssetValues() {
+    return {
+      faviconUrl: container.querySelector('input[name="faviconUrl"]')?.value || '',
+      logoUrl: container.querySelector('input[name="logoUrl"]')?.value || '',
+      bannerUrl: container.querySelector('input[name="bannerUrl"]')?.value || '',
+    };
+  }
+
+  function setAssetValue(field, url) {
+    const picker = container.querySelector(`.agcms-asset-picker[data-field="${field}"]`);
+    if (!picker) return;
+    picker.querySelector(`input[name="${field}"]`).value = url || '';
+    picker.querySelectorAll('.agcms-asset-item').forEach((li) => {
+      li.classList.toggle('agcms-asset-item--selected', li.dataset.url === url);
+    });
+    picker.querySelector('.agcms-asset-current').innerHTML = renderCurrentPreview(url);
   }
 
   function renderWidgetCard(w) {
@@ -192,7 +277,85 @@ window.AGCMS_PAGES.personalization = async function renderPersonalization(contai
       });
       toast(t('personalization.savedSuccess'));
     });
+
+    document.getElementById('cookie-consent-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const form = event.target;
+      await apiFetch('/api/settings', {
+        method: 'PATCH',
+        body: JSON.stringify({
+          cookieConsent: {
+            enabled: form.cookieConsentEnabled.checked,
+            message: form.cookieConsentMessage.value,
+            acceptLabel: form.cookieConsentAcceptLabel.value,
+            learnMoreLabel: form.cookieConsentLearnMoreLabel.value,
+            learnMoreUrl: form.cookieConsentLearnMoreUrl.value.trim(),
+          },
+        }),
+      });
+      toast(t('personalization.savedSuccess'));
+    });
   }
+
+  container.querySelectorAll('.agcms-asset-select').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      setAssetValue(btn.dataset.field, btn.dataset.url);
+    });
+  });
+
+  container.querySelectorAll('.agcms-asset-upload-toggle').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const form = container.querySelector(`.agcms-asset-upload-form[data-field="${btn.dataset.field}"]`);
+      if (form) form.hidden = !form.hidden;
+    });
+  });
+
+  container.querySelectorAll('.agcms-asset-upload-submit').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const field = btn.dataset.field;
+      const wrapper = container.querySelector(`.agcms-asset-upload-form[data-field="${field}"]`);
+      const fileInput = wrapper.querySelector('.agcms-asset-upload-file');
+      const labelInput = wrapper.querySelector('.agcms-asset-upload-label');
+      const errorEl = wrapper.querySelector('.agcms-error');
+      errorEl.hidden = true;
+
+      const file = fileInput.files[0];
+      if (!file) {
+        errorEl.textContent = t('media.invalidType');
+        errorEl.hidden = false;
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('altText', labelInput.value.trim());
+
+      const res = await apiFetch('/api/media', { method: 'POST', body: formData });
+      if (!res.ok) {
+        const data = await readJsonSafe(res);
+        errorEl.textContent = data.error || t('media.invalidType');
+        errorEl.hidden = false;
+        return;
+      }
+      const { media: uploaded } = await res.json();
+      toast(t('media.uploadSuccess'));
+      renderPersonalization(container, params, ctx, { ...currentAssetValues(), [field]: uploaded.url });
+    });
+  });
+
+  container.querySelectorAll('.agcms-asset-delete').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      if (!window.confirm(t('media.confirmDelete'))) return;
+      const values = currentAssetValues();
+      await apiFetch(`/api/media/${btn.dataset.id}`, { method: 'DELETE' });
+      // Ha az eppen torolt kep volt kivalasztva egy mezohoz, azt is toroljuk a valasztasbol.
+      const deletedUrl = btn.closest('.agcms-asset-item')?.dataset.url;
+      for (const field of Object.keys(values)) {
+        if (values[field] === deletedUrl) values[field] = '';
+      }
+      renderPersonalization(container, params, ctx, values);
+    });
+  });
 
   document.getElementById('widget-add-form').addEventListener('submit', async (event) => {
     event.preventDefault();

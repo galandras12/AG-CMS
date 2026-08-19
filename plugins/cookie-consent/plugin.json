@@ -1,0 +1,8 @@
+{
+  "name": "cookie-consent",
+  "version": "1.0.0",
+  "author": "AG-CMS",
+  "description": "EU-s (GDPR) cookie-/adatkezelési értesítő sáv a publikus oldalon, amit a látogatónak el kell fogadnia. A tényleges megjelenítés az admin Személyre szabás felületén, külön kapcsolóval be/kikapcsolható és szerkeszthető - ez a plugin.json 'enabled' mezője csak azt szabályozza, hogy a funkció egyáltalán elérhető-e a szerveren (szerver-újraindítást igényel).",
+  "main": "index.js",
+  "enabled": true
+}
